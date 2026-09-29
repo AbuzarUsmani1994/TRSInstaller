@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.5" name="IRSecurity">
+  <DataContextMoniker Name="/IRSecurityDataContext" />
+  <nestedChildShapes>
+    <classShape Id="b2218db2-e2ca-4c8b-9b3a-935c7bd44869" absoluteBounds="7.75, 3, 2, 1.9631982421874996">
+      <DataClassMoniker Name="/IRSecurityDataContext/DatabaseVersion" />
+      <nestedChildShapes>
+        <elementListCompartment Id="9e5dab6c-3c51-42b1-a4b4-8dafe97ed7ab" absoluteBounds="7.765, 3.46, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="4bf675db-767f-4bf4-9d53-1fb4b9d16c15" absoluteBounds="5, 4.375, 2, 1.3862939453124996">
+      <DataClassMoniker Name="/IRSecurityDataContext/SystemParameter" />
+      <nestedChildShapes>
+        <elementListCompartment Id="7eb3f002-214f-48bf-8e57-8f55b5ec5d96" absoluteBounds="5.015, 4.835, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="dc13faf6-2262-4aea-9b4f-d0832e93cad4" absoluteBounds="3.75, 2.125, 2, 1.9631982421875">
+      <DataClassMoniker Name="/IRSecurityDataContext/DatabaseVersion" />
+      <nestedChildShapes>
+        <elementListCompartment Id="847578f6-1aa0-4855-a820-6230d0784807" absoluteBounds="3.7649999999999997, 2.585, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="4e37aa05-d758-4c4b-8470-d3206ffa748a" absoluteBounds="1.375, 1.375, 2, 1.5785953776041666">
+      <DataClassMoniker Name="/IRSecurityDataContext/Server" />
+      <nestedChildShapes>
+        <elementListCompartment Id="e9963fbe-36c2-4db4-a478-c7ee920820d9" absoluteBounds="1.3899999999999997, 1.835, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="4e5b6838-6088-4109-b2ab-e03bc4d962c7" absoluteBounds="5.875, 0.5, 2, 2.3478011067708335">
+      <DataClassMoniker Name="/IRSecurityDataContext/InstalledHotfix" />
+      <nestedChildShapes>
+        <elementListCompartment Id="e6b063c9-188a-4edb-86cc-8630eb54b5ae" absoluteBounds="5.89, 0.96, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+  </nestedChildShapes>
+</ordesignerObjectsDiagram>

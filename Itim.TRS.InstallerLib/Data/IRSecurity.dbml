@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="Catalogue" Class="IRSecurityDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=192.168.3.243;Initial Catalog=Catalogue;User ID=sa" SettingsObjectName="Itim.TRS.InstallerLib.Properties.Settings" SettingsPropertyName="CatalogueConnectionString2" Provider="System.Data.SqlClient" />
+  <Table Name="IRSecurity.DatabaseVersion" Member="DatabaseVersions">
+    <Type Name="DatabaseVersion">
+      <Column Name="pkDatabaseVersionId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="fkSystemApplicationId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="VersionNumber" Type="System.String" DbType="VarChar(25) NOT NULL" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="VarChar(256)" CanBeNull="true" />
+      <Column Name="ReleaseDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="DeploymentDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.SystemParameter" Member="SystemParameters">
+    <Type Name="SystemParameter">
+      <Column Name="pkSystemParameterID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="VarChar(256) NOT NULL" CanBeNull="false" />
+      <Column Name="Value" Type="System.String" DbType="VarChar(256) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="IRSecurity.Server" Member="Servers">
+    <Type Name="Server">
+      <Column Name="pkServerId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="IP" Type="System.String" DbType="VarChar(25) NOT NULL" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="VarChar(256) NOT NULL" CanBeNull="false" />
+      <Column Name="fkTRSInstanceId" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="IsDatabaseServer" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="IRSecurity.InstalledHotfix" Member="InstalledHotfixes">
+    <Type Name="InstalledHotfix">
+      <Column Name="pkInstalledHotfixId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="HotfixVersion" Type="System.String" DbType="VarChar(30) NOT NULL" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="VarChar(256) NOT NULL" CanBeNull="false" />
+      <Column Name="ReleaseDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="DeploymentDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="IsForWebServer" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="IsForAppServer" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="IsForDBServer" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="IRSecurity.TRSInstance" Member="TRSInstances">
+    <Type Name="TRSInstance">
+      <Column Name="pkTRSInstanceId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="IsSelfInstance" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="IsMasterInstance" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="InstanceCode" Type="System.String" DbType="VarChar(500) NOT NULL" CanBeNull="false" />
+      <Column Name="InstanceName" Type="System.String" DbType="VarChar(500) NOT NULL" CanBeNull="false" />
+      <Column Name="InstanceURI" Type="System.String" DbType="VarChar(500)" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="IRSecurity.InstalledHotfixDetails" Member="InstalledHotfixDetails">
+    <Type Name="InstalledHotfixDetails">
+      <Column Name="pkInstalledHotfixDetailID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="fkInstalledHotfixID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Artifacts" Type="System.String" DbType="VarChar(256) NOT NULL" CanBeNull="false" />
+      <Column Name="IsForWebServer" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="IsForAppServer" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="IsForDBServer" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+</Database>

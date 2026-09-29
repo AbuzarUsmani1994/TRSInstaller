@@ -1,0 +1,276 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ERR_CUSTOMER_NOT_SUPPORTED" xml:space="preserve">
+    <value>This is a customer-specific {1} that is not intended for ‘{0}’. {1} installation has been terminated.</value>
+  </data>
+  <data name="ERR_DATABASE_DIR_NOT_FOUND" xml:space="preserve">
+    <value>The {0} does not contain the Database directory. Any sql script files referenced in the configuration file should be located in the Database folder.</value>
+  </data>
+	<data name="ERR_APP_DIR_NOT_FOUND" xml:space="preserve">
+    <value>The {0} does not contain the Applications directory. Any App files referenced in the configuration file should be located in the Applications folder.</value>
+  </data>
+  <data name="ERR_EXE_NOT_FOUND" xml:space="preserve">
+    <value>The executable {0} was not found. This is required to continue the installation. Installation has been terminated.</value>
+  </data>
+  <data name="ERR_Patch_ALREADY_INSTALLED" xml:space="preserve">
+    <value>The Patch (v{0}) you are trying to install is already present on this deployment. Patch installation has been terminated.</value>
+  </data>
+  <data name="ERR_INSTALLATION_CORRUPT" xml:space="preserve">
+    <value>The specified Installation Folder does not appear to be a valid The Retail Suite installation folder. Please specify the correct installation folder. Installation has been terminated.</value>
+  </data>
+  <data name="ERR_INSTALL_DIR_NOT_FOUND" xml:space="preserve">
+    <value>Installation directory was not found.</value>
+  </data>
+  <data name="ERR_MISSING_CATALOGUE_CONNECTION_STRING" xml:space="preserve">
+    <value>Connection string names "Catalogue" is missing in the configuration file {0}.exe.config. The installer requires this connection string to connect with the database.</value>
+  </data>
+  <data name="ERR_MISSING_CONNECTION_STRING_SECTION" xml:space="preserve">
+    <value>Connection string section was missing in the configuration file {0}.exe.config.</value>
+  </data>
+  <data name="ERR_MISSING_PREREQUISITE_PatchES" xml:space="preserve">
+    <value>Installation of Patch {0} cannot continue. Following required Patches are missing: {1}</value>
+  </data>
+  <data name="ERR_MISSING_REQUIRED_RELEASES" xml:space="preserve">
+    <value>The {3} (v{0}) is not compatible with the version installed on this machine (v{1}). This {3} can only be installed over the following release versions: {2}</value>
+  </data>
+  <data name="ERR_NONE_INSTALLATION_MODE" xml:space="preserve">
+    <value>Installation mode could not be detected. Verify that the installation directory has a valid TRS installation. Terminating installation.</value>
+  </data>
+  <data name="ERR_PREREQ_CONFIG" xml:space="preserve">
+    <value>Error reading Prerequiste configuration section from the configuration file. Make sure that the section exists and is correctly defined.</value>
+  </data>
+  <data name="ERR_USER_ABORT" xml:space="preserve">
+    <value>Installation was aborted by the user.</value>
+  </data>
+  <data name="INF_BEGIN_Patch_INSTALL" xml:space="preserve">
+    <value>Beginning installation for Patch v{0} - {1}</value>
+  </data>
+  <data name="INF_CHECK_FS_DB_SYNCH" xml:space="preserve">
+    <value>Ensuring that file system and databases are in synch.</value>
+  </data>
+  <data name="INF_CHECK_Patch_COMPAT" xml:space="preserve">
+    <value>Checking pre-requisite Patches...</value>
+  </data>
+  <data name="INF_CHECK_RELEASE_COMPAT" xml:space="preserve">
+    <value>Checking compatibilty with installed releases...</value>
+  </data>
+  <data name="INF_CHECK_SUPPORTED_CLIENTS" xml:space="preserve">
+    <value>Checking compatibility for this client...</value>
+  </data>
+  <data name="INF_CONFIG_FILE" xml:space="preserve">
+    <value>Reading connection string from</value>
+  </data>
+  <data name="INF_CONN_STRING" xml:space="preserve">
+    <value>Using connection string {0}</value>
+  </data>
+  <data name="INF_COPY_COMPLETE" xml:space="preserve">
+    <value>{0} files copied.</value>
+  </data>
+  <data name="INF_COPY_FILES" xml:space="preserve">
+    <value>Copying patch files...</value>
+  </data>
+  <data name="INF_DELETE_TEMP" xml:space="preserve">
+    <value>Deleting temporary installation files</value>
+  </data>
+  <data name="INF_DETECT_INSTALL_MODE" xml:space="preserve">
+    <value>Detecting installation mode...</value>
+  </data>
+  <data name="INF_EXECUTING_SQLSCRIPT" xml:space="preserve">
+    <value>Executing sql scripts {0}...</value>
+  </data>
+  <data name="INF_FILE_COPIED" xml:space="preserve">
+    <value>{0} copied.</value>
+  </data>
+  <data name="INF_FINALIZE_INSTALL" xml:space="preserve">
+    <value>Finalizing installation</value>
+  </data>
+  <data name="INF_INSTALL_COMPLETE" xml:space="preserve">
+    <value>Installation completed successfully</value>
+  </data>
+  <data name="INF_INSTALL_MODE" xml:space="preserve">
+    <value>Installation mode is {0}</value>
+  </data>
+  <data name="INF_READ_CONFIG" xml:space="preserve">
+    <value>Reading configuration file...</value>
+  </data>
+  <data name="INF_REFLEX_INSTALL_MODE" xml:space="preserve">
+    <value>Reflex installation mode is {0}</value>
+  </data>
+  <data name="INF_RESTART_REFLEX" xml:space="preserve">
+    <value>Restarting Reflex...</value>
+  </data>
+  <data name="INF_ROLLBACK_END" xml:space="preserve">
+    <value>Rollback Complete</value>
+  </data>
+  <data name="INF_ROLLBACK_FILE_COPY" xml:space="preserve">
+    <value>Replacing old files...</value>
+  </data>
+  <data name="INF_ROLLBACK_START" xml:space="preserve">
+    <value>Rolling back installation...</value>
+  </data>
+  <data name="INF_RUN_RFGR" xml:space="preserve">
+    <value>Executing rfgr...</value>
+  </data>
+  <data name="INF_RUN_RFSDLL" xml:space="preserve">
+    <value>Executing rfsdll...</value>
+  </data>
+  <data name="INF_SEARCH_CON_STRING" xml:space="preserve">
+    <value>Searching for connection string in the destination directory...</value>
+  </data>
+  <data name="INF_SHUTDOWN_REFLEX" xml:space="preserve">
+    <value>Shutting down Reflex...</value>
+  </data>
+  <data name="INF_SQLSCRIPT_COMPLETED" xml:space="preserve">
+    <value>Script {0} successfully executed.</value>
+  </data>
+  <data name="INF_VERIFY_INSTALLDIR" xml:space="preserve">
+    <value>Verifying installation directory...</value>
+  </data>
+  <data name="INF_VERIFY_PREREQ" xml:space="preserve">
+    <value>Verifying prerequisites...</value>
+  </data>
+  <data name="WRN_DB_FILE_OUTOFSYNC" xml:space="preserve">
+    <value>Patches on the file system and database are out of sync.</value>
+  </data>
+  <data name="WRN_Patch_NOT_ON_DB" xml:space="preserve">
+    <value>Following fixes are not found on the database:</value>
+  </data>
+  <data name="WRN_Patch_NOT_ON_FS" xml:space="preserve">
+    <value>Following fixes are not found on the file system:</value>
+  </data>
+  <data name="ERR_MISSING_PREREQUISITE_HOTFIXES" xml:space="preserve">
+    <value>Installation of hotfix {0} cannot continue. Following required hotfixes are missing: {1}</value>
+  </data>
+  <data name="INF_CHECK_HOTFIX_COMPAT" xml:space="preserve">
+    <value>Checking pre-requisite hotfixes...</value>
+  </data>
+  <data name="WRN_HOTFIX_NOT_ON_DB" xml:space="preserve">
+    <value>Following fixes are not found on the database:</value>
+  </data>
+  <data name="WRN_HOTFIX_NOT_ON_FS" xml:space="preserve">
+    <value>Following fixes are not found on the file system:</value>
+  </data>
+  <data name="INF_BEGIN_HOTFIX_INSTALL" xml:space="preserve">
+    <value>Beginning installation for hotfix v{0} - {1}</value>
+  </data>
+  <data name="INF_HOTFIX_ALREADY_INSTALL" xml:space="preserve">
+    <value>The Hotfix (v{0}) is already installed on {1}.</value>
+  </data>
+</root>
