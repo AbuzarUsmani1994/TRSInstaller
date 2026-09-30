@@ -123,14 +123,12 @@ namespace Itim.TRS.InstallerLib
                                            PreRequisites = GetItemsFromElement(fix, "PreRequisites", "version"),
 										   CompatibleReleases = GetItemsFromElement(fix, "CompatibleReleases", "version"),
 										   SupportedClients = GetItemsFromElement(fix, "SupportedClients", "name"),
-										   IISFiles = GetItemsFromElement(fix, "IISFiles", "file")
+										   IISApplications = GetIISApplicationsFromElement(fix, "IISApplications")
 
 									   }).ToList()[0];
 
 				if (_patchConfigSection == null)
 					throw new ConfigurationErrorsException(Resources.ERR_PREREQ_CONFIG);
-
-				_patchConfigSection.IISSites = ResolveIISSites(_patchConfigSection.IISFiles);
 			}
 			catch (Exception ex)
 			{
@@ -148,82 +146,37 @@ namespace Itim.TRS.InstallerLib
 		}
 
 		/// <summary>
-		/// Reads each file listed in IISFiles (from the package's IIS\ folder) and returns the combined
-		/// list of IIS site definitions. Files that don't exist are skipped here; RunPreChecks is
-		/// responsible for validating that declared files are actually present.
+		/// Reads the &lt;IISApplications&gt;&lt;Application .../&gt;...&lt;/IISApplications&gt; block
+		/// directly from fix.manifest - the AutoHotfixGenerator build tool is responsible for
+		/// translating the package's Web\IIS\ descriptor file(s) into this XML shape ahead of time.
 		/// </summary>
-		private List<IISSiteConfigElement> ResolveIISSites(List<string> iisFiles)
+		private static List<IISApplicationConfigElement> GetIISApplicationsFromElement(XElement fix, string elementName)
 		{
-			List<IISSiteConfigElement> sites = new List<IISSiteConfigElement>();
+			List<IISApplicationConfigElement> applications = new List<IISApplicationConfigElement>();
+			XElement container = fix.Element(elementName);
 
-			if (iisFiles == null || iisFiles.Count == 0)
-				return sites;
+			if (container == null)
+				return applications;
 
-			string iisFolder = Path.Combine(this._sourceDir, "IIS");
-
-			foreach (string fileName in iisFiles)
+			foreach (XElement app in container.Elements("Application"))
 			{
-				string filePath = Path.Combine(iisFolder, fileName);
-				if (File.Exists(filePath))
-					sites.AddRange(ParseIISSiteFile(filePath));
+				IISApplicationConfigElement application = new IISApplicationConfigElement();
+				application.SiteName = GetAttributeValue(app, "siteName");
+				application.Path = GetAttributeValue(app, "path");
+				application.PhysicalPath = GetAttributeValue(app, "physicalPath");
+				application.ApplicationPool = GetAttributeValue(app, "applicationPool");
+				application.PoolFramework = GetAttributeValue(app, "poolFramework");
+				application.PoolPipelineMode = GetAttributeValue(app, "poolPipelineMode");
+				applications.Add(application);
 			}
 
-			return sites;
+			return applications;
 		}
 
-		/// <summary>
-		/// Parses a simple "Key=Value" text file into IIS site definitions. Blank lines separate one
-		/// site block from the next; lines starting with '#' are comments.
-		/// </summary>
-		private static List<IISSiteConfigElement> ParseIISSiteFile(string filePath)
+		private static string GetAttributeValue(XElement element, string attributeName)
 		{
-			List<IISSiteConfigElement> sites = new List<IISSiteConfigElement>();
-			Dictionary<string, string> current = null;
-			string[] lines = File.ReadAllLines(filePath);
-
-			for (int i = 0; i <= lines.Length; i++)
-			{
-				string line = (i < lines.Length) ? lines[i].Trim() : string.Empty;
-				bool isEndOfFile = (i == lines.Length);
-
-				if (line.Length == 0 || isEndOfFile)
-				{
-					if (current != null && current.Count > 0)
-					{
-						IISSiteConfigElement site = new IISSiteConfigElement();
-						site.WebsiteName = GetDictionaryValue(current, "WebsiteName");
-						site.PhysicalPath = GetDictionaryValue(current, "PhysicalPath");
-						site.Pool = GetDictionaryValue(current, "Pool");
-						site.PoolFramework = GetDictionaryValue(current, "PoolFramework");
-						site.PoolPipelineMode = GetDictionaryValue(current, "PoolPipelineMode");
-						site.BindingProtocol = GetDictionaryValue(current, "BindingProtocol");
-						site.BindingInfo = GetDictionaryValue(current, "BindingInfo");
-						sites.Add(site);
-					}
-					current = null;
-					continue;
-				}
-
-				if (line.StartsWith("#"))
-					continue;
-
-				int separatorIndex = line.IndexOf('=');
-				if (separatorIndex <= 0)
-					continue;
-
-				if (current == null)
-					current = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-				current[line.Substring(0, separatorIndex).Trim()] = line.Substring(separatorIndex + 1).Trim();
-			}
-
-			return sites;
-		}
-
-		private static string GetDictionaryValue(Dictionary<string, string> dictionary, string key)
-		{
-			string value;
-			return dictionary.TryGetValue(key, out value) ? value : null;
+			XAttribute attribute = element.Attribute(attributeName);
+			return attribute != null ? attribute.Value : null;
 		}
 		#endregion
 	}

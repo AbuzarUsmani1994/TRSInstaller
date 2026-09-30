@@ -7,6 +7,7 @@ using Itim.TRS.InstallerLib.Properties;
 using System.IO;
 using Itim.TRS.InstallerLib.Events;
 using Itim.TRS.InstallerLib.Data;
+using Itim.TRS.InstallerLib.Configuration;
 
 namespace Itim.TRS.InstallerLib
 {
@@ -104,7 +105,7 @@ namespace Itim.TRS.InstallerLib
                 _hotfixDetails.IsForWebServer = false;
 
             if (Directory.Exists(Path.Combine(SourceDir, "Applications")) && this.PatchConfig.AppArtifacts.Count() > 0)
-                { 
+                {
                     AppFilesList = PatchConfig.AppArtifacts
                     .Where(file => file.Contains("."))
                                             .ToList();
@@ -113,6 +114,20 @@ namespace Itim.TRS.InstallerLib
 
                 else
                     _hotfixDetails.IsForAppServer = false;
+
+            // IIS Applications are Web-tier only, so they're recorded in the same WebFilesList
+            // bucket (IsForWebServer) as WebArtifacts above - InstalledHotfixDetails.Artifacts has
+            // no dedicated columns, so WebsiteName/PhysicalPath/Pool are packed into one string per entry.
+            if (this.PatchConfig.IISApplications != null && this.PatchConfig.IISApplications.Count() > 0)
+            {
+                foreach (IISApplicationConfigElement application in this.PatchConfig.IISApplications)
+                {
+                    string websiteName = !string.IsNullOrEmpty(application.Path) ? application.Path.TrimStart('/') : application.Path;
+                    WebFilesList.Add(String.Format("WebsiteName={0};PhysicalPath={1};Pool={2}",
+                        websiteName, application.PhysicalPath, application.ApplicationPool));
+                }
+                _hotfixDetails.IsForWebServer = true;
+            }
 
             DBManager.SaveHotfix(_hotfixDetails, newSqlScriptsList,AppFilesList, WebFilesList);
         }

@@ -204,23 +204,18 @@ namespace Itim.TRS.InstallerLib
                 //        throw new Exception("App files list count in manifest does not match with the actual applications file count.");
                 //}
 
-                List<string> iisFiles = _patchConfigSection.IISFiles;
-                if (iisFiles != null && iisFiles.Count > 0)
+                List<IISApplicationConfigElement> iisApplications = _patchConfigSection.IISApplications;
+                if (iisApplications != null && iisApplications.Count > 0)
                 {
-                    if (!Directory.Exists(Path.Combine(SourceDir, "IIS")))
-                        throw new ConfigurationErrorsException(String.Format("IIS configuration directory not found for the {0}.", _patchConfigSection.Type));
-                    else
+                    foreach (IISApplicationConfigElement application in iisApplications)
                     {
-                        string iisPath = Path.Combine(SourceDir, "IIS");
-                        string[] iisFilesOnDisk = Directory.GetFiles(iisPath, "*", SearchOption.TopDirectoryOnly)
-                               .Select(file => Path.GetFileName(file))
-                               .ToArray();
+                        if (string.IsNullOrEmpty(application.SiteName) || string.IsNullOrEmpty(application.Path)
+                            || string.IsNullOrEmpty(application.PhysicalPath))
+                            throw new Exception("An IIS Application entry in the manifest is missing siteName, path, or physicalPath.");
 
-                        foreach (string file in iisFiles)
-                        {
-                            if (!iisFilesOnDisk.Contains(file))
-                                throw new Exception(String.Format("IIS configuration file {0} not found in the {1}.", file, _patchConfigSection.Type));
-                        }
+                        string packagePhysicalPath = Path.Combine(SourceDir, application.PhysicalPath);
+                        if (!Directory.Exists(packagePhysicalPath))
+                            throw new Exception(String.Format("IIS Application physical path '{0}' not found in the {1}.", application.PhysicalPath, _patchConfigSection.Type));
                     }
                 }
 
@@ -257,7 +252,7 @@ namespace Itim.TRS.InstallerLib
                 RaiseProgressEvent(40, String.Format("Copying {0} contents.", _patchConfigSection.Type));
                 CopyFixContents();
                 RaiseProgressEvent(10, "Configuring IIS sites.");
-                ConfigureIISSites();
+                ConfigureIISApplications();
                 RaiseProgressEvent(10, "Finalizing installation.");
                 FinalizeInstallation();
                 RaiseProgressEvent(10, String.Format("{1} applied successfully on {0}", serverName, _patchConfigSection.Type));
@@ -697,26 +692,28 @@ namespace Itim.TRS.InstallerLib
         }
 
         /// <summary>
-        /// Creates/updates IIS sites and application pools declared in the fix manifest (PatchConfig.IISSites).
-        /// Only relevant on Web-tier servers; a no-op if the fix declares no IIS sites.
+        /// Creates/updates IIS Applications (and their app pools) declared in the fix manifest
+        /// (PatchConfig.IISApplications). Each entry attaches to a Site that is expected to already
+        /// exist (e.g. "Default Web Site") via appcmd's "add app" - this does not create new Sites or
+        /// bindings. Only relevant on Web-tier servers; a no-op if the fix declares no applications.
         /// </summary>
-        private void ConfigureIISSites()
+        private void ConfigureIISApplications()
         {
             if (!Utils.HasServerRole(ServerMode.Web, TRSInstallationMode))
                 return;
 
-            List<IISSiteConfigElement> sites = _patchConfigSection.IISSites;
-            if (sites == null || sites.Count == 0)
+            List<IISApplicationConfigElement> applications = _patchConfigSection.IISApplications;
+            if (applications == null || applications.Count == 0)
                 return;
 
             HashSet<string> processedPools = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (IISSiteConfigElement site in sites)
+            foreach (IISApplicationConfigElement application in applications)
             {
-                if (!string.IsNullOrEmpty(site.Pool) && processedPools.Add(site.Pool))
-                    EnsureAppPool(site.Pool, site.PoolFramework, site.PoolPipelineMode);
+                if (!string.IsNullOrEmpty(application.ApplicationPool) && processedPools.Add(application.ApplicationPool))
+                    EnsureAppPool(application.ApplicationPool, application.PoolFramework, application.PoolPipelineMode);
 
-                EnsureSite(site);
+                EnsureApplication(application);
             }
         }
 
@@ -738,32 +735,32 @@ namespace Itim.TRS.InstallerLib
             RunAppCmd(arguments.ToString());
         }
 
-        private void EnsureSite(IISSiteConfigElement site)
+        private void EnsureApplication(IISApplicationConfigElement application)
         {
-            if (string.IsNullOrEmpty(site.WebsiteName) || string.IsNullOrEmpty(site.PhysicalPath))
+            if (string.IsNullOrEmpty(application.SiteName) || string.IsNullOrEmpty(application.Path)
+                || string.IsNullOrEmpty(application.PhysicalPath))
             {
-                LogEvent(NotificationType.Warning, "IIS site entry is missing WebsiteName or PhysicalPath. Skipping.");
+                LogEvent(NotificationType.Warning, "IIS Application entry is missing siteName, path, or physicalPath. Skipping.");
                 return;
             }
 
-            string absolutePhysicalPath = Path.Combine(InstallationDir, site.PhysicalPath);
+            string absolutePhysicalPath = Path.Combine(InstallationDir, application.PhysicalPath);
+            string appName = application.SiteName + application.Path;
 
-            if (SiteExists(site.WebsiteName))
+            if (ApplicationExists(application.SiteName, application.Path))
             {
-                LogEvent(NotificationType.Warning, String.Format("Site '{0}' already exists. Skipping creation.", site.WebsiteName));
-                return;
+                LogEvent(NotificationType.Info, String.Format("Application '{0}' already exists under site '{1}'. Updating physical path.", application.Path, application.SiteName));
+                RunAppCmd(String.Format("set vdir \"{0}/\" /physicalPath:\"{1}\"", appName, absolutePhysicalPath));
+            }
+            else
+            {
+                LogEvent(NotificationType.Info, String.Format("Creating application '{0}' under site '{1}' at '{2}'.", application.Path, application.SiteName, absolutePhysicalPath));
+                RunAppCmd(String.Format("add app /site.name:\"{0}\" /path:\"{1}\" /physicalPath:\"{2}\"",
+                    application.SiteName, application.Path, absolutePhysicalPath));
             }
 
-            StringBuilder arguments = new StringBuilder(
-                String.Format("add site /name:\"{0}\" /physicalPath:\"{1}\"", site.WebsiteName, absolutePhysicalPath));
-            if (!string.IsNullOrEmpty(site.BindingProtocol) && !string.IsNullOrEmpty(site.BindingInfo))
-                arguments.AppendFormat(" /bindings:{0}/{1}", site.BindingProtocol, site.BindingInfo);
-
-            LogEvent(NotificationType.Info, String.Format("Creating site '{0}' at '{1}'.", site.WebsiteName, absolutePhysicalPath));
-            RunAppCmd(arguments.ToString());
-
-            if (!string.IsNullOrEmpty(site.Pool))
-                RunAppCmd(String.Format("set app \"{0}/\" /applicationPool:\"{1}\"", site.WebsiteName, site.Pool));
+            if (!string.IsNullOrEmpty(application.ApplicationPool))
+                RunAppCmd(String.Format("set app \"{0}/\" /applicationPool:\"{1}\"", appName, application.ApplicationPool));
         }
 
         private bool AppPoolExists(string poolName)
@@ -774,12 +771,12 @@ namespace Itim.TRS.InstallerLib
             return exitCode == 0 && output.IndexOf(poolName, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        private bool SiteExists(string siteName)
+        private bool ApplicationExists(string siteName, string path)
         {
             string output;
             int exitCode = Utils.RunExecutableCapture(GetAppCmdPath(), Environment.SystemDirectory,
-                String.Format("list site /name:\"{0}\"", siteName), out output);
-            return exitCode == 0 && output.IndexOf(siteName, StringComparison.OrdinalIgnoreCase) >= 0;
+                String.Format("list app /app.name:\"{0}{1}\"", siteName, path), out output);
+            return exitCode == 0 && output.IndexOf(siteName + path, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private void RunAppCmd(string arguments)
@@ -789,7 +786,7 @@ namespace Itim.TRS.InstallerLib
 
         private static string GetAppCmdPath()
         {
-            return Path.Combine(Environment.SystemDirectory, "inetsrv", "appcmd.exe");
+            return Path.Combine(Path.Combine(Environment.SystemDirectory, "inetsrv"), "appcmd.exe");
         }
 
 

@@ -31,14 +31,10 @@ namespace Itim.TRS.InstallerLib.Configuration
         public List<string> WebArtifacts { get; set; }
 
         /// <summary>
-        /// File names (under the package's IIS\ folder) that describe IIS sites/app pools to configure.
+        /// IIS Application definitions (virtual application + app pool assignment under an existing
+        /// Site), declared directly in fix.manifest under &lt;IISApplications&gt;.
         /// </summary>
-        public List<string> IISFiles { get; set; }
-
-        /// <summary>
-        /// Resolved IIS site definitions, read from the files listed in IISFiles.
-        /// </summary>
-        public List<IISSiteConfigElement> IISSites { get; set; }
+        public List<IISApplicationConfigElement> IISApplications { get; set; }
     }
     
 }
