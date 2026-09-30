@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Itim.TRS.InstallerLib.Configuration;
 using Itim.TRS.InstallerLib.Data;
 using Itim.TRS.InstallerLib.Events;
@@ -203,6 +204,25 @@ namespace Itim.TRS.InstallerLib
                 //        throw new Exception("App files list count in manifest does not match with the actual applications file count.");
                 //}
 
+                List<string> iisFiles = _patchConfigSection.IISFiles;
+                if (iisFiles != null && iisFiles.Count > 0)
+                {
+                    if (!Directory.Exists(Path.Combine(SourceDir, "IIS")))
+                        throw new ConfigurationErrorsException(String.Format("IIS configuration directory not found for the {0}.", _patchConfigSection.Type));
+                    else
+                    {
+                        string iisPath = Path.Combine(SourceDir, "IIS");
+                        string[] iisFilesOnDisk = Directory.GetFiles(iisPath, "*", SearchOption.TopDirectoryOnly)
+                               .Select(file => Path.GetFileName(file))
+                               .ToArray();
+
+                        foreach (string file in iisFiles)
+                        {
+                            if (!iisFilesOnDisk.Contains(file))
+                                throw new Exception(String.Format("IIS configuration file {0} not found in the {1}.", file, _patchConfigSection.Type));
+                        }
+                    }
+                }
 
                 isSuccess = true;
             }
@@ -236,6 +256,8 @@ namespace Itim.TRS.InstallerLib
                 FillFixDetails();
                 RaiseProgressEvent(40, String.Format("Copying {0} contents.", _patchConfigSection.Type));
                 CopyFixContents();
+                RaiseProgressEvent(10, "Configuring IIS sites.");
+                ConfigureIISSites();
                 RaiseProgressEvent(10, "Finalizing installation.");
                 FinalizeInstallation();
                 RaiseProgressEvent(10, String.Format("{1} applied successfully on {0}", serverName, _patchConfigSection.Type));
@@ -260,6 +282,8 @@ namespace Itim.TRS.InstallerLib
             _dbCheck = true;
             VerifyPreRequisites();
             _dbCheck = false;
+
+            CheckForIndexOperations();
 
             RaiseProgressEvent(20, "Executing database scripts.");
             ExecuteDatabaseScript();
@@ -622,6 +646,151 @@ namespace Itim.TRS.InstallerLib
             }
         }
 
+        private static readonly Regex IndexDdlPattern = new Regex(
+            @"CREATE\s+(UNIQUE\s+|CLUSTERED\s+|NONCLUSTERED\s+|COLUMNSTORE\s+)*INDEX",
+            RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// Scans only PreInstall.sql/PostInstall.sql for index-creation statements (SPs/Functions/Triggers
+        /// scripts are intentionally excluded - a CREATE INDEX on a #temp table inside a stored procedure
+        /// is normal procedure logic, not a real schema change). If a match is found, prompts the user
+        /// (via NotifyUser) that index changes should be applied out-of-hours; declining aborts the whole
+        /// install before any database/file changes are made.
+        /// </summary>
+        private void CheckForIndexOperations()
+        {
+            List<string> sqlScripts = _patchConfigSection.SqlScripts;
+            if (sqlScripts == null || sqlScripts.Count == 0)
+                return;
+
+            string databasePatchDir = Path.Combine(SourceDir, "Database");
+            List<string> scriptsWithIndexes = new List<string>();
+
+            foreach (string script in sqlScripts)
+            {
+                string fileName = Path.GetFileName(script);
+                bool isPreOrPostInstall =
+                    fileName.Equals("PreInstall.sql", StringComparison.OrdinalIgnoreCase) ||
+                    fileName.Equals("PostInstall.sql", StringComparison.OrdinalIgnoreCase);
+
+                if (!isPreOrPostInstall)
+                    continue;
+
+                string scriptPath = Path.Combine(databasePatchDir, script);
+                if (!File.Exists(scriptPath))
+                    continue;
+
+                string content = File.ReadAllText(scriptPath);
+                if (IndexDdlPattern.IsMatch(content))
+                    scriptsWithIndexes.Add(script);
+            }
+
+            if (scriptsWithIndexes.Count > 0)
+            {
+                string scriptList = String.Join(Environment.NewLine + "- ", scriptsWithIndexes.ToArray());
+                string message = String.Format(
+                    "The following script(s) contain index changes and should be applied during out-of-hours:{0}- {1}",
+                    Environment.NewLine, scriptList);
+
+                NotifyUser(message);
+            }
+        }
+
+        /// <summary>
+        /// Creates/updates IIS sites and application pools declared in the fix manifest (PatchConfig.IISSites).
+        /// Only relevant on Web-tier servers; a no-op if the fix declares no IIS sites.
+        /// </summary>
+        private void ConfigureIISSites()
+        {
+            if (!Utils.HasServerRole(ServerMode.Web, TRSInstallationMode))
+                return;
+
+            List<IISSiteConfigElement> sites = _patchConfigSection.IISSites;
+            if (sites == null || sites.Count == 0)
+                return;
+
+            HashSet<string> processedPools = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (IISSiteConfigElement site in sites)
+            {
+                if (!string.IsNullOrEmpty(site.Pool) && processedPools.Add(site.Pool))
+                    EnsureAppPool(site.Pool, site.PoolFramework, site.PoolPipelineMode);
+
+                EnsureSite(site);
+            }
+        }
+
+        private void EnsureAppPool(string poolName, string framework, string pipelineMode)
+        {
+            if (AppPoolExists(poolName))
+            {
+                LogEvent(NotificationType.Info, String.Format("App pool '{0}' already exists. Skipping creation.", poolName));
+                return;
+            }
+
+            StringBuilder arguments = new StringBuilder(String.Format("add apppool /name:\"{0}\"", poolName));
+            if (!string.IsNullOrEmpty(framework))
+                arguments.AppendFormat(" /managedRuntimeVersion:{0}", framework);
+            if (!string.IsNullOrEmpty(pipelineMode))
+                arguments.AppendFormat(" /managedPipelineMode:{0}", pipelineMode);
+
+            LogEvent(NotificationType.Info, String.Format("Creating application pool '{0}'.", poolName));
+            RunAppCmd(arguments.ToString());
+        }
+
+        private void EnsureSite(IISSiteConfigElement site)
+        {
+            if (string.IsNullOrEmpty(site.WebsiteName) || string.IsNullOrEmpty(site.PhysicalPath))
+            {
+                LogEvent(NotificationType.Warning, "IIS site entry is missing WebsiteName or PhysicalPath. Skipping.");
+                return;
+            }
+
+            string absolutePhysicalPath = Path.Combine(InstallationDir, site.PhysicalPath);
+
+            if (SiteExists(site.WebsiteName))
+            {
+                LogEvent(NotificationType.Warning, String.Format("Site '{0}' already exists. Skipping creation.", site.WebsiteName));
+                return;
+            }
+
+            StringBuilder arguments = new StringBuilder(
+                String.Format("add site /name:\"{0}\" /physicalPath:\"{1}\"", site.WebsiteName, absolutePhysicalPath));
+            if (!string.IsNullOrEmpty(site.BindingProtocol) && !string.IsNullOrEmpty(site.BindingInfo))
+                arguments.AppendFormat(" /bindings:{0}/{1}", site.BindingProtocol, site.BindingInfo);
+
+            LogEvent(NotificationType.Info, String.Format("Creating site '{0}' at '{1}'.", site.WebsiteName, absolutePhysicalPath));
+            RunAppCmd(arguments.ToString());
+
+            if (!string.IsNullOrEmpty(site.Pool))
+                RunAppCmd(String.Format("set app \"{0}/\" /applicationPool:\"{1}\"", site.WebsiteName, site.Pool));
+        }
+
+        private bool AppPoolExists(string poolName)
+        {
+            string output;
+            int exitCode = Utils.RunExecutableCapture(GetAppCmdPath(), Environment.SystemDirectory,
+                String.Format("list apppool /name:\"{0}\"", poolName), out output);
+            return exitCode == 0 && output.IndexOf(poolName, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private bool SiteExists(string siteName)
+        {
+            string output;
+            int exitCode = Utils.RunExecutableCapture(GetAppCmdPath(), Environment.SystemDirectory,
+                String.Format("list site /name:\"{0}\"", siteName), out output);
+            return exitCode == 0 && output.IndexOf(siteName, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private void RunAppCmd(string arguments)
+        {
+            Utils.RunExecutableChecked(GetAppCmdPath(), Environment.SystemDirectory, arguments);
+        }
+
+        private static string GetAppCmdPath()
+        {
+            return Path.Combine(Environment.SystemDirectory, "inetsrv", "appcmd.exe");
+        }
 
 
 

@@ -43,12 +43,56 @@ namespace Itim.TRS.InstallerLib
                 throw new Exception(String.Format(Resources.ERR_EXE_NOT_FOUND,executableFilePath));
 
             shellProcess.StartInfo.UseShellExecute = false;
-            
+
             shellProcess.StartInfo.WorkingDirectory = workingDirectory;
-            shellProcess.StartInfo.FileName = executableFilePath;            
-            shellProcess.StartInfo.Arguments = arguments;            
+            shellProcess.StartInfo.FileName = executableFilePath;
+            shellProcess.StartInfo.Arguments = arguments;
             shellProcess.Start();
             shellProcess.WaitForExit();
+        }
+
+        /// <summary>
+        /// Same as RunExecutable, but throws if the process exits with a non-zero exit code.
+        /// Kept separate from RunExecutable so existing callers (e.g. Reflex components) are unaffected.
+        /// </summary>
+        public static void RunExecutableChecked(string executableFilePath, string workingDirectory, string arguments)
+        {
+            if (!File.Exists(executableFilePath))
+                throw new Exception(String.Format(Resources.ERR_EXE_NOT_FOUND, executableFilePath));
+
+            Process shellProcess = new Process();
+            shellProcess.StartInfo.UseShellExecute = false;
+            shellProcess.StartInfo.WorkingDirectory = workingDirectory;
+            shellProcess.StartInfo.FileName = executableFilePath;
+            shellProcess.StartInfo.Arguments = arguments;
+            shellProcess.Start();
+            shellProcess.WaitForExit();
+
+            if (shellProcess.ExitCode != 0)
+                throw new Exception(String.Format("Command '{0} {1}' failed with exit code {2}.",
+                    executableFilePath, arguments, shellProcess.ExitCode));
+        }
+
+        /// <summary>
+        /// Runs a process and captures its standard output, without throwing on a non-zero exit code
+        /// (used for existence checks, e.g. "appcmd list site", where a non-zero exit just means "not found").
+        /// </summary>
+        public static int RunExecutableCapture(string executableFilePath, string workingDirectory, string arguments, out string output)
+        {
+            if (!File.Exists(executableFilePath))
+                throw new Exception(String.Format(Resources.ERR_EXE_NOT_FOUND, executableFilePath));
+
+            Process shellProcess = new Process();
+            shellProcess.StartInfo.UseShellExecute = false;
+            shellProcess.StartInfo.RedirectStandardOutput = true;
+            shellProcess.StartInfo.CreateNoWindow = true;
+            shellProcess.StartInfo.WorkingDirectory = workingDirectory;
+            shellProcess.StartInfo.FileName = executableFilePath;
+            shellProcess.StartInfo.Arguments = arguments;
+            shellProcess.Start();
+            output = shellProcess.StandardOutput.ReadToEnd();
+            shellProcess.WaitForExit();
+            return shellProcess.ExitCode;
         }
 
         /// <summary>

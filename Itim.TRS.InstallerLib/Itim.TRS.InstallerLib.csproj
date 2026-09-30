@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\PatchfixConfigurationSection.cs" />
+    <Compile Include="Configuration\IISSiteConfigElement.cs" />
     <Compile Include="Configuration\SqlScriptCollection.cs" />
     <Compile Include="Configuration\SqlScriptConfigElement.cs" />
     <Compile Include="Data\IRSecurity.cs">
